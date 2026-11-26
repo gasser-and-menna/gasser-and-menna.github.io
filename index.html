@@ -4,12 +4,13 @@
 .insert>span{font-size:17px}.insert b{font-family:Ruqaa,Amiri,serif;font-weight:400;font-size:clamp(30px,7vw,42px)}
 .flap.left,.flap.right{z-index:2}.flap.bottom{z-index:3}.flap.top{z-index:4;transform-origin:center top}.wax{z-index:5}
 .opened .packet>.label,.opened .openText,.opened .packet small{opacity:0;transition:opacity .22s}
-.opened .wax{animation:peel .43s ease-in both;transform-origin:55% 68%}
-.opened .top{animation:unfold 1.05s .26s cubic-bezier(.42,0,.22,1) both}
-.opened .insert{animation:extract 1.4s .91s cubic-bezier(.22,.65,.25,1) both}
-.opened .envelope{animation:settle 2s .28s ease both}
-@keyframes peel{0%{transform:rotate(0);opacity:1}75%{opacity:1}100%{transform:translate(-5%,-9%) rotate(-10deg) scale(1.03);opacity:0}}
-@keyframes unfold{0%{transform:rotateX(0);z-index:4}52%{transform:rotateX(90deg);z-index:4;filter:brightness(.82)}53%{z-index:0}100%{transform:rotateX(171deg);z-index:0;filter:brightness(.9)}}
+.opened .wax{animation:release .54s ease-out both}
+.opened .top{animation:fold .95s .1s cubic-bezier(.4,0,.28,1) both}
+.opened .insert{display:none}
+.opened .envelope{animation:lower 1.55s .18s cubic-bezier(.35,.02,.3,1) both;overflow:hidden}
+@keyframes release{to{opacity:0;transform:translateY(-3px)}}
+@keyframes fold{0%{transform:rotateX(0);opacity:1}65%{opacity:.65}100%{transform:rotateX(78deg);opacity:0}}
+@keyframes lower{to{transform:translateY(24px)}}
 @keyframes extract{0%{transform:translateY(0);opacity:0}12%{opacity:1}100%{transform:translateY(-62%);opacity:1}}
 @keyframes settle{0%{transform:none}100%{transform:translateY(11%)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
@@ -41,40 +42,29 @@ async function openInvite(){
  if(!page.hidden)return;
  play();page.hidden=false;page.inert=true;intro.inert=true;
  document.body.classList.add('opening');
- const hero=page.querySelector('.hero'),card=hero.querySelector('.card'),insert=intro.querySelector('.insert');
- let flight;
- function paper(){
-   const crop=document.createElement('div'),copy=hero.cloneNode(true);
-   copy.querySelector('h1').removeAttribute('tabindex');
-   crop.setAttribute('aria-hidden','true');crop.append(copy);
-   const scene=hero.getBoundingClientRect(),frame=card.getBoundingClientRect();
-   Object.assign(copy.style,{width:scene.width+'px',height:scene.height+'px',left:(scene.left-frame.left)+'px',top:(scene.top-frame.top)+'px'});
-   Object.assign(crop.style,{width:frame.width+'px',height:frame.height+'px'});
-   return crop;
- }
  try{
-   await document.fonts.ready;
-   if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&insert.animate){
-     const preview=paper(),target=card.getBoundingClientRect();
-     preview.className='paper-window';
-     const scale=Math.min(insert.clientWidth/target.width,insert.clientHeight/target.height);
-     Object.assign(insert.style,{width:target.width*scale+'px',height:target.height*scale+'px',inset:'4% 0 auto',marginInline:'auto'});
-     Object.assign(preview.style,{transformOrigin:'top left',left:'0',right:'auto',transform:'scale('+scale+')'});
-     insert.replaceChildren(preview);intro.classList.add('opened');
-     void insert.offsetWidth;
-     await Promise.all(insert.getAnimations().map(animation=>animation.finished));
-     const from=preview.getBoundingClientRect(),to=card.getBoundingClientRect();
-     flight=preview;flight.className='flight';document.body.append(flight);
-     Object.assign(flight.style,{inset:'auto',left:to.left+'px',top:to.top+'px',transform:'none'});
-     insert.style.visibility='hidden';intro.classList.add('leaving');
-     const transform='translate('+(from.left-to.left)+'px,'+(from.top-to.top)+'px) scale('+scale+')';
-     const pocketTop=el('envelope').getBoundingClientRect().top;
-     const covered=Math.max(0,Math.min(100,100*(from.bottom-pocketTop)/from.height));
-     await flight.animate([{transform,clipPath:'inset(0 0 '+covered+'% 0)',offset:0},{transform:'none',clipPath:'inset(0)',offset:.88},{transform:'none',clipPath:'inset(0)',boxShadow:'none',offset:1}],{duration:1200,easing:'cubic-bezier(.28,.12,.2,1)',fill:'both'}).finished;
+   if(!matchMedia('(prefers-reduced-motion:reduce)').matches && page.animate){
+     const card=page.querySelector('.card').getBoundingClientRect();
+     const envelope=el('envelope').getBoundingClientRect();
+     const center=card.top+card.height/2;
+     const lift=Math.min(52,Math.max(22,envelope.height*.13));
+     page.style.transformOrigin='50% '+(center-page.getBoundingClientRect().top)+'px';
+     intro.classList.add('opened');
+     const timing={duration:1900,fill:'both'};
+     const motion=page.animate([
+       {transform:'translateY('+lift+'px) scale(.94)',easing:'cubic-bezier(.28,.08,.2,1)'},
+       {transform:'none'}
+     ],timing);
+     const reveal=intro.animate([
+       {opacity:1,offset:0},{opacity:1,offset:.12,easing:'cubic-bezier(.45,0,.38,1)'},
+       {opacity:0,offset:.82},{opacity:0}
+     ],timing);
+     await Promise.all([motion.finished,reveal.finished]);
+     intro.hidden=true;motion.cancel();reveal.cancel();
    }
  }finally{
-   flight?.remove();insert.replaceChildren();intro.hidden=true;page.inert=false;document.body.classList.remove('opening');
-   sound.hidden=false;card.querySelector('h1').focus({preventScroll:true});
+   intro.hidden=true;page.inert=false;document.body.classList.remove('opening');
+   sound.hidden=false;page.querySelector('h1').focus({preventScroll:true});
  }
 }
 el('envelope').onclick=el('openText').onclick=openInvite;
