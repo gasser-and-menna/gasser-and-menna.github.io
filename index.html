@@ -53,21 +53,24 @@ async function openInvite(){
    return crop;
  }
  try{
+   await document.fonts.ready;
    if(!matchMedia('(prefers-reduced-motion:reduce)').matches&&insert.animate){
      const preview=paper(),target=card.getBoundingClientRect();
      preview.className='paper-window';
-     Object.assign(preview.style,{transformOrigin:'top left',left:'0',right:'auto',transform:'scale('+insert.offsetWidth/target.width+','+insert.offsetHeight/target.height+')'});
+     const scale=Math.min(insert.clientWidth/target.width,insert.clientHeight/target.height);
+     Object.assign(insert.style,{width:target.width*scale+'px',height:target.height*scale+'px',inset:'4% 0 auto',marginInline:'auto'});
+     Object.assign(preview.style,{transformOrigin:'top left',left:'0',right:'auto',transform:'scale('+scale+')'});
      insert.replaceChildren(preview);intro.classList.add('opened');
      void insert.offsetWidth;
-     await Promise.all(insert.getAnimations().map(a=>a.finished));
-     const from=insert.getBoundingClientRect(),to=card.getBoundingClientRect();
-     flight=paper();flight.className='flight';document.body.append(flight);
-     Object.assign(flight.style,{left:to.left+'px',top:to.top+'px'});
+     await Promise.all(insert.getAnimations().map(animation=>animation.finished));
+     const from=preview.getBoundingClientRect(),to=card.getBoundingClientRect();
+     flight=preview;flight.className='flight';document.body.append(flight);
+     Object.assign(flight.style,{inset:'auto',left:to.left+'px',top:to.top+'px',transform:'none'});
      insert.style.visibility='hidden';intro.classList.add('leaving');
-     const transform='translate('+(from.left-to.left)+'px,'+(from.top-to.top)+'px) scale('+from.width/to.width+','+from.height/to.height+')';
+     const transform='translate('+(from.left-to.left)+'px,'+(from.top-to.top)+'px) scale('+scale+')';
      const pocketTop=el('envelope').getBoundingClientRect().top;
      const covered=Math.max(0,Math.min(100,100*(from.bottom-pocketTop)/from.height));
-     await flight.animate([{transform,clipPath:'inset(0 0 '+covered+'% 0)',offset:0},{transform:'none',clipPath:'inset(0)',offset:.88},{transform:'none',clipPath:'inset(0)',boxShadow:'none',offset:1}],{duration:1050,easing:'cubic-bezier(.35,0,.2,1)',fill:'both'}).finished;
+     await flight.animate([{transform,clipPath:'inset(0 0 '+covered+'% 0)',offset:0},{transform:'none',clipPath:'inset(0)',offset:.88},{transform:'none',clipPath:'inset(0)',boxShadow:'none',offset:1}],{duration:1200,easing:'cubic-bezier(.28,.12,.2,1)',fill:'both'}).finished;
    }
  }finally{
    flight?.remove();insert.replaceChildren();intro.hidden=true;page.inert=false;document.body.classList.remove('opening');
