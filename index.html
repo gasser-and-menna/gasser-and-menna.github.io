@@ -6,8 +6,8 @@
 .opened .packet>.label,.opened .openText,.opened .packet small{opacity:0;transition:opacity .22s}
 .opened .wax{animation:peel .43s ease-in both;transform-origin:55% 68%}
 .opened .top{animation:unfold 1.05s .26s cubic-bezier(.42,0,.22,1) both}
-.opened .insert{animation:extract .94s .78s cubic-bezier(.36,.05,.52,.72) both}
-.opened .envelope{animation:settle 1.4s .26s ease both}
+.opened .insert{animation:extract 1.4s .91s cubic-bezier(.22,.65,.25,1) both}
+.opened .envelope{animation:settle 2s .28s ease both}
 @keyframes peel{0%{transform:rotate(0);opacity:1}75%{opacity:1}100%{transform:translate(-5%,-9%) rotate(-10deg) scale(1.03);opacity:0}}
 @keyframes unfold{0%{transform:rotateX(0);z-index:4}52%{transform:rotateX(90deg);z-index:4;filter:brightness(.82)}53%{z-index:0}100%{transform:rotateX(171deg);z-index:0;filter:brightness(.9)}}
 @keyframes extract{0%{transform:translateY(0);opacity:0}12%{opacity:1}100%{transform:translateY(-62%);opacity:1}}
@@ -70,14 +70,7 @@ async function openInvite(){
      const transform='translate('+(from.left-to.left)+'px,'+(from.top-to.top)+'px) scale('+scale+')';
      const pocketTop=el('envelope').getBoundingClientRect().top;
      const covered=Math.max(0,Math.min(100,100*(from.bottom-pocketTop)/from.height));
-     const dx=from.left-to.left,dy=from.top-to.top;
-     const lift=Math.min(18,from.height*.06);
-     const glide='translate('+dx*.95+'px,'+(dy-lift)+'px) scale('+(scale+(1-scale)*.05)+')';
-     await flight.animate([
-       {transform,clipPath:'inset(0 0 '+covered+'% 0)',offset:0,easing:'linear'},
-       {transform:glide,clipPath:'inset(0 0 '+covered*.77+'% 0)',offset:.11,easing:'cubic-bezier(.23,.39,.21,1)'},
-       {transform:'none',clipPath:'inset(0)',boxShadow:'none'}
-     ],{duration:1050,fill:'both'}).finished;
+     await flight.animate([{transform,clipPath:'inset(0 0 '+covered+'% 0)',offset:0},{transform:'none',clipPath:'inset(0)',offset:.88},{transform:'none',clipPath:'inset(0)',boxShadow:'none',offset:1}],{duration:1200,easing:'cubic-bezier(.28,.12,.2,1)',fill:'both'}).finished;
    }
  }finally{
    flight?.remove();insert.replaceChildren();intro.hidden=true;page.inert=false;document.body.classList.remove('opening');
