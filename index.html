@@ -6,11 +6,13 @@
 .opened .packet>.label,.opened .openText,.opened .packet small{opacity:0;transition:opacity .22s}
 .opened .wax{animation:release .54s ease-out both}
 .opened .top{animation:fold .95s .1s cubic-bezier(.4,0,.28,1) both}
-.opened .insert{display:none}
-.opened .envelope{animation:lower 1.55s .18s cubic-bezier(.35,.02,.3,1) both;overflow:hidden}
+.opened .insert{inset:1% 6% 4%;overflow:hidden;outline:1px solid #d0c6af;outline-offset:-7px;animation:peek .78s .37s cubic-bezier(.32,.04,.25,1) both}
+.opened .insert>span,.opened .insert>b{visibility:hidden}
+@keyframes peek{0%{opacity:0;transform:translateY(1%)}22%{opacity:1}100%{opacity:1;transform:translateY(-13%)}}
+.opened .envelope{animation:lower 1.55s .18s cubic-bezier(.35,.02,.3,1) both;overflow:visible}
 @keyframes release{to{opacity:0;transform:translateY(-3px)}}
 @keyframes fold{0%{transform:rotateX(0);opacity:1}65%{opacity:.65}100%{transform:rotateX(78deg);opacity:0}}
-@keyframes lower{to{transform:translateY(24px)}}
+@keyframes lower{to{transform:translateY(12px)}}
 @keyframes extract{0%{transform:translateY(0);opacity:0}12%{opacity:1}100%{transform:translateY(-62%);opacity:1}}
 @keyframes settle{0%{transform:none}100%{transform:translateY(11%)}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
@@ -50,14 +52,14 @@ async function openInvite(){
      const lift=Math.min(52,Math.max(22,envelope.height*.13));
      page.style.transformOrigin='50% '+(center-page.getBoundingClientRect().top)+'px';
      intro.classList.add('opened');
-     const timing={duration:1900,fill:'both'};
+     const timing={duration:2150,fill:'both'};
      const motion=page.animate([
        {transform:'translateY('+lift+'px) scale(.94)',easing:'cubic-bezier(.28,.08,.2,1)'},
        {transform:'none'}
      ],timing);
      const reveal=intro.animate([
-       {opacity:1,offset:0},{opacity:1,offset:.12,easing:'cubic-bezier(.45,0,.38,1)'},
-       {opacity:0,offset:.82},{opacity:0}
+       {opacity:1,offset:0},{opacity:1,offset:.50,easing:'cubic-bezier(.45,0,.38,1)'},
+       {opacity:0,offset:.98},{opacity:0}
      ],timing);
      await Promise.all([motion.finished,reveal.finished]);
      intro.hidden=true;motion.cancel();reveal.cancel();
